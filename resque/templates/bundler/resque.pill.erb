@@ -32,7 +32,7 @@ Bluepill.application("#{app_name}_resque", :log_file => "/var/log/bluepill.log")
       process.group = 'resque'
       process.pid_file = "/var/run/resque/#{app_name}/worker_#{idx}.pid"
       process.working_dir = "/data/#{app_name}/current"
-      process.start_command = "/usr/bin/rake " +
+      process.start_command = "bundle exec rake " +
         "RACK_ENV=#{rails_env} RAILS_ENV=#{rails_env} " +
         "QUEUE=#{queue.join(',')} resque:work"
       process.stop_command = <<-EOF
