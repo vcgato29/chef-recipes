@@ -7,6 +7,8 @@ rails_env = "<%= @rails_env %>"
 num_workers = "<%= @num_workers %>".to_i
 owner_name = "<%= @owner_name %>"
 
+rake_command = "<%= @bundler ? "bundle exec rake" : "/usr/bin/rake" %> "
+
 Bluepill.application("#{app_name}_resque", :log_file => "/var/log/bluepill.log") do |app|
 
   app.uid = app.gid = owner_name
@@ -16,9 +18,10 @@ Bluepill.application("#{app_name}_resque", :log_file => "/var/log/bluepill.log")
       process.group = 'resque'
       process.pid_file = "/var/run/resque/#{app_name}/worker_#{idx}.pid"
       process.working_dir = "/data/#{app_name}/current"
-      process.start_command = "/usr/bin/rake " +
+      process.start_command = rake_command +
         "RACK_ENV=#{rails_env} RAILS_ENV=#{rails_env} " +
-        "QUEUE=* resque:work"
+        "QUEUE=* " +
+        "environment resque:work"
        process.stop_command = <<-EOF
       kill -QUIT {{PID}}
       sleep_count=0

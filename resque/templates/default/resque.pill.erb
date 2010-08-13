@@ -12,6 +12,8 @@ rails_env = "<%= @rails_env %>"
 owner_name = "<%= @owner_name %>"
 num_workers_from_recipe = "<%= @num_workers %>".to_i
 
+rake_command = "<%= @bundler ? "bundle exec rake" : "/usr/bin/rake" %> "
+
 min_num_workers = [queues_for_individual_workers.length, 1].max
 num_workers = [min_num_workers, num_workers_from_recipe].max
 
@@ -32,9 +34,10 @@ Bluepill.application("#{app_name}_resque", :log_file => "/var/log/bluepill.log")
       process.group = 'resque'
       process.pid_file = "/var/run/resque/#{app_name}/worker_#{idx}.pid"
       process.working_dir = "/data/#{app_name}/current"
-      process.start_command = "/usr/bin/rake " +
+      process.start_command = rake_command +
         "RACK_ENV=#{rails_env} RAILS_ENV=#{rails_env} " +
-        "QUEUE=#{queue.join(',')} resque:work"
+        "QUEUE=#{queue.join(',')} " +
+        "environment resque:work"
       process.stop_command = <<-EOF
       kill -QUIT {{PID}}
       sleep_count=0
